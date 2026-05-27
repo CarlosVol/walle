@@ -7,9 +7,6 @@ from renderer.graph_renderer import draw_graph
 from renderer.ui_renderer    import draw_menu, draw_win_screen, draw_hud
 from minigames                import get_random_minigame
 
-SCREEN_W = 800
-SCREEN_H = 600
-
 
 def _start_game(state: GameState) -> None:
     node_ids = list(NODES.keys())
@@ -39,13 +36,18 @@ def _move_to(state: GameState, node_id: str) -> None:
 
 
 def main() -> None:
-    pr.init_window(SCREEN_W, SCREEN_H, "Walle")
+    pr.set_config_flags(pr.FLAG_FULLSCREEN_MODE)
+    pr.init_window(0, 0, "Walle")
     pr.set_target_fps(60)
+
+    cover_texture = pr.load_texture("images/portada.jpeg")
 
     state = GameState()
 
     while not pr.window_should_close():
-        dt = pr.get_frame_time()
+        dt          = pr.get_frame_time()
+        sw          = pr.get_screen_width()
+        sh          = pr.get_screen_height()
 
         if state.phase == GamePhase.MINIGAME and state.active_minigame:
             state.active_minigame.update(dt)
@@ -57,7 +59,7 @@ def main() -> None:
         pr.begin_drawing()
 
         if state.phase == GamePhase.MENU:
-            if draw_menu():
+            if draw_menu(cover_texture, sw, sh):
                 _start_game(state)
 
         elif state.phase == GamePhase.GRAPH:
@@ -71,25 +73,27 @@ def main() -> None:
                 state.start_node,
                 state.end_node,
                 adjacent,
+                sw, sh,
             )
-            draw_hud(state.current_node, state.end_node, len(state.visited_nodes))
+            draw_hud(state.current_node, state.end_node, len(state.visited_nodes), sw, sh)
 
             if state.minigame_result is not None:
                 msg = "Minijuego superado!" if state.minigame_result else "Fallaste el minijuego"
                 color = pr.GREEN if state.minigame_result else pr.RED
-                pr.draw_text(msg, 10, SCREEN_H - 52, 18, color)
+                pr.draw_text(msg, 10, sh - 52, 18, color)
 
             if clicked and _is_valid_move(state, clicked):
                 _move_to(state, clicked)
 
         elif state.phase == GamePhase.MINIGAME and state.active_minigame:
-            state.active_minigame.draw()
+            state.active_minigame.draw(sw, sh)
 
         elif state.phase == GamePhase.WIN:
-            draw_win_screen(len(state.visited_nodes))
+            draw_win_screen(len(state.visited_nodes), sw, sh)
 
         pr.end_drawing()
 
+    pr.unload_texture(cover_texture)
     pr.close_window()
 
 

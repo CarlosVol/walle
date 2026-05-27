@@ -1,12 +1,12 @@
 from .model import Node, Edge
 
 NODES: dict[str, Node] = {
-    "A": Node("A", "Alpha",   150, 150),
-    "B": Node("B", "Beta",    350,  80),
-    "C": Node("C", "Gamma",   600, 120),
-    "D": Node("D", "Delta",   280, 300),
-    "E": Node("E", "Epsilon", 520, 320),
-    "F": Node("F", "Zeta",    680, 450),
+    "A": Node("A", "A", 150, 150),
+    "B": Node("B", "B", 350,  80),
+    "C": Node("C", "C", 600, 120),
+    "D": Node("D", "D", 280, 300),
+    "E": Node("E", "E", 520, 320),
+    "F": Node("F", "F", 680, 450),
 }
 
 EDGES: list[Edge] = [

@@ -12,13 +12,15 @@ class SurviveTimerMinigame:
     def update(self, dt: float) -> None:
         self._elapsed += dt
 
-    def draw(self) -> None:
+    def draw(self, sw: int, sh: int) -> None:
         pr.clear_background(pr.Color(60, 10, 10, 255))
-        pr.draw_text("¡Sobrevive!", 300, 180, 40, pr.RAYWHITE)
+        msg = "¡Sobrevive!"
+        mw  = pr.measure_text(msg, 56)
+        pr.draw_text(msg, (sw - mw) // 2, int(sh * 0.30), 56, pr.RAYWHITE)
         remaining = max(0.0, _DURATION - self._elapsed)
         label = f"{remaining:.1f}"
-        lw = pr.measure_text(label, 72)
-        pr.draw_text(label, (800 - lw) // 2, 270, 72, pr.GOLD)
+        lw = pr.measure_text(label, 96)
+        pr.draw_text(label, (sw - lw) // 2, int(sh * 0.45), 96, pr.GOLD)
 
     @property
     def is_complete(self) -> bool:

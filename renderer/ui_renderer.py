@@ -1,49 +1,48 @@
 import pyray as pr
 
-SCREEN_W = 800
-SCREEN_H = 600
 
+def draw_menu(cover_texture: pr.Texture, sw: int, sh: int) -> bool:
+    # stretch image to fill screen
+    src  = pr.Rectangle(0, 0, cover_texture.width, cover_texture.height)
+    dest = pr.Rectangle(0, 0, sw, sh)
+    pr.draw_texture_pro(cover_texture, src, dest, pr.Vector2(0, 0), 0.0, pr.WHITE)
 
-def draw_menu() -> bool:
-    pr.clear_background(pr.BLACK)
+    # dark overlay so button is readable
+    pr.draw_rectangle(0, 0, sw, sh, pr.Color(0, 0, 0, 120))
 
-    title = "WALLE"
-    tw = pr.measure_text(title, 64)
-    pr.draw_text(title, (SCREEN_W - tw) // 2, 160, 64, pr.RAYWHITE)
-
-    btn_w, btn_h = 200, 60
-    btn_x = (SCREEN_W - btn_w) // 2
-    btn_y = 320
+    btn_w, btn_h = 260, 70
+    btn_x = (sw - btn_w) // 2
+    btn_y = int(sh * 0.70)
 
     mx = pr.get_mouse_x()
     my = pr.get_mouse_y()
     hovered = btn_x <= mx <= btn_x + btn_w and btn_y <= my <= btn_y + btn_h
-    color = pr.GOLD if hovered else pr.DARKGRAY
+    bg = pr.Color(200, 160, 0, 220) if hovered else pr.Color(40, 40, 40, 200)
 
-    pr.draw_rectangle(btn_x, btn_y, btn_w, btn_h, color)
-    pr.draw_rectangle_lines(btn_x, btn_y, btn_w, btn_h, pr.RAYWHITE)
+    pr.draw_rectangle(btn_x, btn_y, btn_w, btn_h, bg)
+    pr.draw_rectangle_lines_ex(pr.Rectangle(btn_x, btn_y, btn_w, btn_h), 3, pr.RAYWHITE)
     label = "INICIAR"
-    lw = pr.measure_text(label, 28)
-    pr.draw_text(label, btn_x + (btn_w - lw) // 2, btn_y + 16, 28, pr.RAYWHITE)
+    lw = pr.measure_text(label, 34)
+    pr.draw_text(label, btn_x + (btn_w - lw) // 2, btn_y + 18, 34, pr.RAYWHITE)
 
     return hovered and pr.is_mouse_button_pressed(pr.MOUSE_BUTTON_LEFT)
 
 
-def draw_win_screen(steps: int) -> None:
+def draw_win_screen(steps: int, sw: int, sh: int) -> None:
     pr.clear_background(pr.DARKGREEN)
     msg = "¡LLEGASTE!"
-    mw = pr.measure_text(msg, 56)
-    pr.draw_text(msg, (SCREEN_W - mw) // 2, 200, 56, pr.GOLD)
+    mw = pr.measure_text(msg, 72)
+    pr.draw_text(msg, (sw - mw) // 2, int(sh * 0.35), 72, pr.GOLD)
     sub = f"Nodos visitados: {steps}"
-    sw = pr.measure_text(sub, 28)
-    pr.draw_text(sub, (SCREEN_W - sw) // 2, 290, 28, pr.RAYWHITE)
+    sw2 = pr.measure_text(sub, 32)
+    pr.draw_text(sub, (sw - sw2) // 2, int(sh * 0.52), 32, pr.RAYWHITE)
     hint = "Cierra la ventana para salir"
-    hw = pr.measure_text(hint, 20)
-    pr.draw_text(hint, (SCREEN_W - hw) // 2, 500, 20, pr.LIGHTGRAY)
+    hw = pr.measure_text(hint, 22)
+    pr.draw_text(hint, (sw - hw) // 2, int(sh * 0.85), 22, pr.LIGHTGRAY)
 
 
-def draw_hud(current_node: str, end_node: str, steps: int) -> None:
-    pr.draw_text(f"Nodo actual: {current_node}", 10, 10, 18, pr.RAYWHITE)
-    pr.draw_text(f"Destino: {end_node}", 10, 32, 18, pr.GOLD)
-    pr.draw_text(f"Pasos: {steps}", 10, 54, 18, pr.LIGHTGRAY)
-    pr.draw_text("Clic en nodo adyacente para moverte", 10, SCREEN_H - 28, 16, pr.GRAY)
+def draw_hud(current_node: str, end_node: str, steps: int, sw: int, sh: int) -> None:
+    pr.draw_text(f"Nodo actual: {current_node}", 14, 14, 22, pr.RAYWHITE)
+    pr.draw_text(f"Destino: {end_node}", 14, 40, 22, pr.GOLD)
+    pr.draw_text(f"Pasos: {steps}", 14, 66, 22, pr.LIGHTGRAY)
+    pr.draw_text("Clic en nodo adyacente para moverte", 14, sh - 32, 18, pr.GRAY)
