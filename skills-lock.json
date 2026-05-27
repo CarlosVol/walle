@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "skills": {
+    "add-effect": {
+      "source": "EvanLavender13/audio-jones",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/add-effect/SKILL.md",
+      "computedHash": "2bd52312ce84686fc22f85c6b1742b5506f61cab98370e1e0fd919a196956820"
+    },
+    "brainstorm": {
+      "source": "EvanLavender13/audio-jones",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/brainstorm/SKILL.md",
+      "computedHash": "25de5f7ff56651a2cae1636a400c5897b12135ada16a8d34fdd8ec96624c5538"
+    },
+    "commit": {
+      "source": "EvanLavender13/audio-jones",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/commit/SKILL.md",
+      "computedHash": "f5d48309e92a7b84c91c8dd04c50001fb4dad4d7dfc5560b765f9bc74906a61c"
+    },
+    "feature-plan": {
+      "source": "EvanLavender13/audio-jones",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/feature-plan/SKILL.md",
+      "computedHash": "c24733590c2454188ee695878562010a170249dd888d64e41f8b729a667363de"
+    },
+    "feature-review": {
+      "source": "EvanLavender13/audio-jones",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/feature-review/SKILL.md",
+      "computedHash": "b6ad12c756938c78bd6a19ace9ec7c7163d6254b29d42a09fe7f4e5e33445cf6"
+    },
+    "finalize": {
+      "source": "EvanLavender13/audio-jones",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/finalize/SKILL.md",
+      "computedHash": "36e9ac988f9bb35317e74320aab13f32af7f1f8410f1eec18f307caae3c9b6ed"
+    },
+    "implement": {
+      "source": "EvanLavender13/audio-jones",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/implement/SKILL.md",
+      "computedHash": "12e5db0d96b154c8e1f45b03f75bcba94d5b956e1aa9620f0e0e5bc1a2531f10"
+    },
+    "lint": {
+      "source": "EvanLavender13/audio-jones",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/lint/SKILL.md",
+      "computedHash": "b3d839bf3954ea53cd532bc184edd4299e28ba5621e9d406b2276767f0fa99ca"
+    },
+    "release": {
+      "source": "EvanLavender13/audio-jones",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/release/SKILL.md",
+      "computedHash": "c5d96da1ec87064a2c9ed74a79148db6402f1a9362aaf8b4c383981723628cf9"
+    },
+    "sync-docs": {
+      "source": "EvanLavender13/audio-jones",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/sync-docs/SKILL.md",
+      "computedHash": "da9f026ee00a55a20c36e6ea29f34b1f4d5012547ea43a232f73b1c550041c5c"
+    },
+    "timeline": {
+      "source": "EvanLavender13/audio-jones",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/timeline/SKILL.md",
+      "computedHash": "c6d29d36146fc3d753db4ca9d34860aa030039df5c8606be3901a0cf3e8de51f"
+    },
+    "write-effect-description": {
+      "source": "EvanLavender13/audio-jones",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/write-effect-description/SKILL.md",
+      "computedHash": "9ff67420da9a8a891f30745ffe009f0cb5bd40e89458a1acea78be6b7424617e"
+    }
+  }
+}

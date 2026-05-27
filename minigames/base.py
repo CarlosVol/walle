@@ -1,0 +1,13 @@
+from typing import Protocol, runtime_checkable
+
+
+@runtime_checkable
+class Minigame(Protocol):
+    def update(self, dt: float) -> None: ...
+    def draw(self) -> None: ...
+
+    @property
+    def is_complete(self) -> bool: ...
+
+    @property
+    def passed(self) -> bool: ...

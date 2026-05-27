@@ -1,0 +1,250 @@
+---
+name: brainstorm
+description: Use when exploring a vague idea, finding inspiration, or researching a technique before planning. Triggers on "I want to add...", "what if...", "research", "look up", or when uncertain about what to build.
+---
+
+# Brainstorm & Research
+
+Turn a vague idea into a researched concept through collaborative dialogue. Explore together, then fetch real references and write a research document.
+
+## Core Principles
+
+- **Explore, don't eliminate**: "Both" is a valid answer. Build up constraints, don't force binary choices.
+- **One question at a time**: Multiple choice preferred. Open-ended when needed.
+- **Propose approaches with recommendations**: Present 2-3 options, lead with your pick and why.
+- **No hallucinated implementations**: Real references or stop.
+- **Preserve reference code verbatim**: When the user provides working shader/code or you fetch it from a source, include the EXACT code in the research doc under a `## Reference Code` section. Do NOT paraphrase, summarize, or rewrite it into pseudocode. Implementing agents WILL invent broken alternatives if they only see prose descriptions.
+- **One approach in the output**: Pick the best fit. No "alternatively..." sections.
+- **Look for parameter synergies**: Don't just list what wiggles. Identify where parameters *interact* to create emergent dynamics — gating, tension, resonance between modulated values.
+
+---
+
+## Phase 1: Orient
+
+**Goal**: Understand starting point and context
+
+@docs/effects.md
+
+**Actions**:
+1. Check `docs/research/` for existing research on this topic
+2. If $ARGUMENTS is blank: ask what visual quality or mood they want to explore
+3. If $ARGUMENTS has an idea: restate it in one sentence, naming closest existing effects with exact subcategory placement from the injected inventory above
+
+---
+
+## Phase 2: Explore
+
+**Goal**: Build up understanding through dialogue
+
+**Actions**:
+1. Ask questions one at a time. Prefer multiple choice (2-4 options) when possible.
+2. Frame questions as "and/or" not "either/or" when both could apply:
+   - "Geometric, organic, or a blend?"
+   - "Subtle enhancement or dramatic transformation?"
+   - "Sharp/crisp or soft/diffused?"
+3. Accept compound answers. "Both" or "somewhere between" are progress, not failure to narrow.
+4. After 3-5 exchanges, summarize what you've learned about:
+   - Visual goal (what it looks like)
+   - Motion behavior (how it animates over time, if at all)
+   - Constraints (what it must or must not do)
+5. As the design takes shape, actively look for **parameter interaction patterns** — places where two or more parameters create emergent dynamics when modulated together:
+   - **Cascading thresholds**: Parameter A must reach a level before Parameter B produces visible output. Different audio bands gate each other — sections of a song unlock visual layers that quieter sections hide entirely. (Example: constellation wave amplitude gates triangle fill visibility.)
+   - **Competing forces**: Two parameters push in opposite directions. The visual result shows their tension — neither dominates, and the balance shifts with the music.
+   - **Resonance/alignment**: Two parameters amplify each other when they coincide. Peaks only appear when both values spike together, creating rare bright moments.
+   These patterns make modulation produce song-reactive dynamics (verse looks different from chorus) rather than static or cyclical visuals. Note promising interactions for the research document.
+
+**Note**: Skip audio reactivity questions—all parameters expose to modulation engine. Users configure their own routes. The interaction patterns above are about *structural relationships between parameters*, not about which audio source maps where.
+
+**STOP**: Do not proceed until concept direction is clear enough to research.
+
+---
+
+## Phase 3: Classify
+
+**Goal**: Determine domain type for research
+
+**Actions**:
+1. Classify into one domain:
+
+| Type | Characteristics | Example |
+|------|----------------|---------|
+| Effect (Transform) | Reads input texture, outputs modified pixels | Kuwahara, kaleidoscope |
+| Effect (Feedback) | Reads previous frame, accumulates over time | Flow field, blur |
+| Effect (Output) | Post-process after transforms | Chromatic aberration, bloom |
+| Simulation | Per-agent or field-based compute, writes to texture | Physarum, boids, curl flow |
+| Drawable | Generates geometry drawn to accumulation buffer | Waveforms, particle trails |
+| General | Software/architecture, not a visual pipeline component | UI redesign, serialization |
+
+2. Present classification with one sentence explaining why.
+
+3. Read memories from `MEMORY.md` matching the classified domain.
+
+**STOP**: Do not proceed until user confirms classification.
+
+---
+
+## Phase 4: Research
+
+**Goal**: Find real, fetchable references
+
+**Actions**:
+1. Search with WebSearch, prioritizing bot-friendly sources:
+   - Inigo Quilez articles (iquilezles.org)
+   - GPU Gems chapters
+   - Catlike Coding tutorials
+   - Academic papers (GDC, SIGGRAPH)
+   - GitHub shader repositories
+   - Godot Shaders
+
+2. **Blocked sites** (do NOT attempt to fetch):
+   - **Shadertoy**: ask user to paste shader code AND provide attribution info (see below)
+   - **Wikipedia**: ask user to paste relevant section
+   - Tell them: "[Site] blocks automated access. Paste the relevant content from [URL]"
+
+3. **Shadertoy attribution (REQUIRED)**: When the user pastes Shadertoy code, you MUST collect:
+   - **Shader title** (from the Shadertoy page)
+   - **Author name** (Shadertoy username)
+   - **Shadertoy URL** (e.g. `https://www.shadertoy.com/view/XXXX`)
+   - **License** (default is CC BY-NC-SA 3.0 unless stated otherwise in the shader)
+   - If the user doesn't provide these, ASK before proceeding. Do not skip this.
+
+3. Fetch promising URLs. For each attempt, report:
+   - Fetched: URL loaded, key content
+   - Blocked: bot detection, paywall, timeout
+   - Not attempted: reason
+
+4. If ALL fetches fail: **STOP**. Ask user to provide a source or paste code.
+
+5. **Pick one approach.** If multiple sources describe different methods, select the one that best fits this codebase's complexity level and pipeline. State why. Do not document alternatives.
+
+---
+
+## Phase 5: Compatibility Gate
+
+**Goal**: Verify the technique works in this pipeline
+
+### Effect (Transform/Feedback/Output)
+- Reads input texture? Compatible.
+- Ignores input, generates procedurally? Incompatible as transform. Propose adaptation or reclassify.
+
+### Simulation
+- Per-agent with trails? Follows Physarum/Boids pattern (compute shader + trail texture).
+- Field-based (no agents)? Follows Curl Advection pattern (texture ping-pong).
+- Requires 3D geometry or mesh? Incompatible.
+
+### Drawable
+- Produces 2D geometry (lines, points, shapes)? Draws to accumulation buffer.
+- Requires depth buffer or 3D? Incompatible.
+
+### General
+- No compatibility gate. Proceed.
+
+**STOP**: Do not proceed until user approves compatibility.
+
+---
+
+## Phase 6: Write Research Document
+
+**Goal**: Create `docs/research/<name>.md`
+
+**Actions**:
+1. Write document following the template below
+2. Include ONLY the researched approach—no alternatives section
+
+### Template
+
+```markdown
+# [Name]
+
+[One paragraph: what the viewer sees or what emerges]
+
+## Classification
+
+- **Category**: [e.g. TRANSFORMS > Warp, SIMULATIONS, GENERATORS > Texture]
+- **Pipeline Position**: [From inventory pipeline order]
+- **Compute Model**: [Compute shader + trail texture / Texture ping-pong] (simulations only)
+
+## Attribution
+
+If this effect derives from a Shadertoy shader or other CC-licensed source:
+
+- **Based on**: "[Shader Title]" by [Author]
+- **Source**: [URL]
+- **License**: [CC BY-NC-SA 3.0 / other]
+
+Omit this section if the effect is original or based only on academic techniques.
+
+## References
+
+- [Title](URL) - [What this source provides]
+
+## Reference Code
+
+Include the EXACT working code from references here — user-pasted Shadertoy shaders, fetched GLSL snippets, algorithm implementations. This is the source of truth for implementing agents. Do NOT paraphrase or rewrite into pseudocode.
+
+```glsl
+// Paste complete reference code here, unmodified
+```
+
+## Algorithm
+
+[Adaptation notes: what changes are needed to fit this codebase's conventions.]
+- What to keep verbatim from the reference code above
+- What to replace (e.g., "replace hsl2rgb with gradient LUT sampling", "replace iChannel0 feedback with ping-pong render textures")
+- Parameter mapping from reference defines/constants to config struct fields
+
+## Parameters
+
+| Parameter | Type | Range | Default | Effect |
+|-----------|------|-------|---------|--------|
+
+## Modulation Candidates
+
+- **parameter**: what changes visually when modulated
+
+### Interaction Patterns
+
+Document parameter pairs with cascading threshold, competing forces, or resonance dynamics (defined in Phase 2). If no meaningful interactions exist, omit this section.
+
+**DO NOT prescribe audio sources or mapping recommendations. Users configure their own modulation routes.**
+
+## Notes
+
+[Caveats, performance, edge cases]
+```
+
+For drawables or general features: use the template above, adjusted for the domain. Skip pipeline position for general features.
+
+---
+
+## Phase 7: Summary
+
+**Actions**:
+1. Tell user:
+   - Research document location
+   - Classification
+   - "To plan implementation: `/feature-plan docs/research/<name>.md`"
+
+---
+
+## Output Constraints
+
+- ONLY create `docs/research/<name>.md`
+- Do NOT create plan documents
+- Do NOT proceed past gates without user approval
+- Do NOT present alternative approaches in the research doc
+- Do NOT hallucinate algorithms—real references or stop
+
+---
+
+## Red Flags - STOP
+
+| Thought | Reality |
+|---------|---------|
+| "They need to pick one or the other" | "Both" is valid. Explore the combination. |
+| "I'll skip exploration, the idea is clear" | Phase 2 builds shared understanding. Do it. |
+| "I can invent the algorithm" | Real references only. Ask for sources if fetches fail. |
+| "I'll describe the algorithm in prose" | Include the EXACT reference code. Agents invent broken alternatives from prose. |
+| "I'll include multiple approaches in the doc" | One approach. The chosen one. |
+| "This technique is obviously compatible" | Run the compatibility gate anyway. |
+| "I know what they want" | Ask. One question at a time. |
