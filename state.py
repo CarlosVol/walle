@@ -7,6 +7,7 @@ class GamePhase(Enum):
     MENU     = auto()
     GRAPH    = auto()
     MINIGAME = auto()
+    CASA     = auto()
     WIN      = auto()
 
 

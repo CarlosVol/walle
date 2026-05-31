@@ -47,3 +47,25 @@ def draw_hud(current_node: str, end_node: str, steps: int, boots: int, sw: int, 
     pr.draw_text(f"Pasos: {steps}", 14, 66, 22, pr.LIGHTGRAY)
     pr.draw_text(f"Botas: {boots}/3", 14, 92, 22, pr.GOLD)
     pr.draw_text("Clic en nodo adyacente para moverte", 14, sh - 32, 18, pr.GRAY)
+
+
+def draw_casa_screen(texture: pr.Texture, boots: int, sw: int, sh: int) -> pr.Rectangle:
+    src = pr.Rectangle(0, 0, texture.width, texture.height)
+    dest = pr.Rectangle(0, 0, sw, sh)
+    pr.draw_texture_pro(texture, src, dest, pr.Vector2(0, 0), 0.0, pr.WHITE)
+
+    msg = f"Botas: {boots}/3"
+    pr.draw_text(msg, 20, 20, 32, pr.GOLD)
+
+    btn_w, btn_h = 200, 55
+    btn_x = (sw - btn_w) // 2
+    btn_y = sh - 100
+    mx, my = pr.get_mouse_x(), pr.get_mouse_y()
+    hovered = btn_x <= mx <= btn_x + btn_w and btn_y <= my <= btn_y + btn_h
+    bg = pr.Color(0, 190, 130, 230) if hovered else pr.Color(0, 130, 90, 200)
+    pr.draw_rectangle(btn_x, btn_y, btn_w, btn_h, bg)
+    pr.draw_rectangle_lines_ex(pr.Rectangle(btn_x, btn_y, btn_w, btn_h), 3, pr.RAYWHITE)
+    lbl = "Continuar"
+    lw = pr.measure_text(lbl, 26)
+    pr.draw_text(lbl, btn_x + (btn_w - lw) // 2, btn_y + 14, 26, pr.RAYWHITE)
+    return pr.Rectangle(btn_x, btn_y, btn_w, btn_h)

@@ -4,7 +4,7 @@ import pyray as pr
 from state import GameState, GamePhase
 from graph import NODES, EDGES, dijkstra, get_adjacent
 from renderer.graph_renderer import draw_graph
-from renderer.ui_renderer    import draw_menu, draw_win_screen, draw_hud
+from renderer.ui_renderer    import draw_menu, draw_win_screen, draw_hud, draw_casa_screen
 from minigames                import get_random_minigame
 
 
@@ -41,6 +41,7 @@ def _move_to(state: GameState, node_id: str) -> None:
         else:
             state.map_index += 1
             _new_round(state)
+            state.phase = GamePhase.CASA
     else:
         state.active_minigame = get_random_minigame()
         state.phase = GamePhase.MINIGAME
@@ -56,6 +57,11 @@ def main() -> None:
         pr.load_texture("images/mapa1.png"),
         pr.load_texture("images/mapa2.png"),
         pr.load_texture("images/mapa3.png"),
+    ]
+    casa_textures = [
+        pr.load_texture("images/casa0.png"),
+        pr.load_texture("images/casa1.png"),
+        pr.load_texture("images/casa2.png"),
     ]
 
     state = GameState()
@@ -105,11 +111,21 @@ def main() -> None:
                 color = pr.GREEN if state.minigame_result else pr.RED
                 pr.draw_text(msg, 10, sh - 52, 18, color)
 
-            if clicked and _is_valid_move(state, clicked):
+            if clicked == state.start_node:
+                state.phase = GamePhase.CASA
+            elif clicked and _is_valid_move(state, clicked):
                 _move_to(state, clicked)
 
         elif state.phase == GamePhase.MINIGAME and state.active_minigame:
             state.active_minigame.draw(sw, sh)
+
+        elif state.phase == GamePhase.CASA:
+            tex = casa_textures[min(state.boots, 2)]
+            continuar_btn = draw_casa_screen(tex, state.boots, sw, sh)
+            if pr.is_mouse_button_pressed(pr.MOUSE_BUTTON_LEFT):
+                mx, my = pr.get_mouse_x(), pr.get_mouse_y()
+                if pr.check_collision_point_rec(pr.Vector2(mx, my), continuar_btn):
+                    state.phase = GamePhase.GRAPH
 
         elif state.phase == GamePhase.WIN:
             draw_win_screen(len(state.visited_nodes), sw, sh)
@@ -118,6 +134,8 @@ def main() -> None:
 
     pr.unload_texture(cover_texture)
     for tex in map_textures:
+        pr.unload_texture(tex)
+    for tex in casa_textures:
         pr.unload_texture(tex)
     pr.close_window()
 

@@ -154,7 +154,7 @@ def draw_graph(
         _draw_node(
             nx, ny, nid,
             fill, border,
-            glow=is_current or is_adjacent or is_end,
+            glow=is_current or is_adjacent or is_end or (is_start and not is_current),
             pulse=is_current,
             label_above=label_above,
             label_below=label_below,
@@ -165,6 +165,12 @@ def draw_graph(
             dist = ((mx_pos - nx) ** 2 + (my_pos - ny) ** 2) ** 0.5
             if dist <= NODE_R + 10:
                 pr.draw_circle_lines(nx, ny, NODE_R + 8, pr.Color(140, 200, 255, 180))
+
+        # hover ring for start node → Casa
+        if is_start and not is_current:
+            dist = ((mx_pos - nx) ** 2 + (my_pos - ny) ** 2) ** 0.5
+            if dist <= NODE_R + 10:
+                pr.draw_circle_lines(nx, ny, NODE_R + 8, pr.Color(120, 255, 140, 180))
 
         dist = ((mx_pos - nx) ** 2 + (my_pos - ny) ** 2) ** 0.5
         if dist <= NODE_R and pr.is_mouse_button_pressed(pr.MOUSE_BUTTON_LEFT):
