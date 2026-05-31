@@ -20,3 +20,5 @@ class GameState:
     visited_nodes:   set            = field(default_factory=set)
     active_minigame: Optional[object] = None
     minigame_result: Optional[bool] = None
+    boots:           int             = 0
+    map_index:       int             = 1

@@ -30,9 +30,9 @@ def draw_menu(cover_texture: pr.Texture, sw: int, sh: int) -> bool:
 
 def draw_win_screen(steps: int, sw: int, sh: int) -> None:
     pr.clear_background(pr.DARKGREEN)
-    msg = "¡LLEGASTE!"
-    mw = pr.measure_text(msg, 72)
-    pr.draw_text(msg, (sw - mw) // 2, int(sh * 0.35), 72, pr.GOLD)
+    msg = "¡GANASTE! 3 botas conseguidas"
+    mw = pr.measure_text(msg, 60)
+    pr.draw_text(msg, (sw - mw) // 2, int(sh * 0.35), 60, pr.GOLD)
     sub = f"Nodos visitados: {steps}"
     sw2 = pr.measure_text(sub, 32)
     pr.draw_text(sub, (sw - sw2) // 2, int(sh * 0.52), 32, pr.RAYWHITE)
@@ -41,8 +41,9 @@ def draw_win_screen(steps: int, sw: int, sh: int) -> None:
     pr.draw_text(hint, (sw - hw) // 2, int(sh * 0.85), 22, pr.LIGHTGRAY)
 
 
-def draw_hud(current_node: str, end_node: str, steps: int, sw: int, sh: int) -> None:
+def draw_hud(current_node: str, end_node: str, steps: int, boots: int, sw: int, sh: int) -> None:
     pr.draw_text(f"Nodo actual: {current_node}", 14, 14, 22, pr.RAYWHITE)
     pr.draw_text(f"Destino: {end_node}", 14, 40, 22, pr.GOLD)
     pr.draw_text(f"Pasos: {steps}", 14, 66, 22, pr.LIGHTGRAY)
+    pr.draw_text(f"Botas: {boots}/3", 14, 92, 22, pr.GOLD)
     pr.draw_text("Clic en nodo adyacente para moverte", 14, sh - 32, 18, pr.GRAY)

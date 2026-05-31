@@ -8,7 +8,7 @@ from renderer.ui_renderer    import draw_menu, draw_win_screen, draw_hud
 from minigames                import get_random_minigame
 
 
-def _start_game(state: GameState) -> None:
+def _new_round(state: GameState) -> None:
     node_ids = list(NODES.keys())
     state.start_node, state.end_node = random.sample(node_ids, 2)
     state.current_node  = state.start_node
@@ -16,6 +16,12 @@ def _start_game(state: GameState) -> None:
     state.optimal_path  = dijkstra(NODES, EDGES, state.start_node, state.end_node)
     state.minigame_result = None
     state.phase         = GamePhase.GRAPH
+
+
+def _start_game(state: GameState) -> None:
+    state.boots     = 0
+    state.map_index = 1
+    _new_round(state)
 
 
 def _is_valid_move(state: GameState, node_id: str) -> bool:
@@ -29,7 +35,12 @@ def _move_to(state: GameState, node_id: str) -> None:
     state.current_node = node_id
     state.visited_nodes.add(node_id)
     if node_id == state.end_node:
-        state.phase = GamePhase.WIN
+        state.boots += 1
+        if state.boots >= 3:
+            state.phase = GamePhase.WIN
+        else:
+            state.map_index += 1
+            _new_round(state)
     else:
         state.active_minigame = get_random_minigame()
         state.phase = GamePhase.MINIGAME
@@ -41,6 +52,11 @@ def main() -> None:
     pr.set_target_fps(60)
 
     cover_texture = pr.load_texture("images/portada.jpeg")
+    map_textures  = [
+        pr.load_texture("images/mapa1.png"),
+        pr.load_texture("images/mapa2.png"),
+        pr.load_texture("images/mapa3.png"),
+    ]
 
     state = GameState()
 
@@ -64,6 +80,13 @@ def main() -> None:
 
         elif state.phase == GamePhase.GRAPH:
             pr.clear_background(pr.Color(30, 30, 30, 255))
+            tex = map_textures[state.map_index - 1]
+            pr.draw_texture_pro(
+                tex,
+                pr.Rectangle(0, 0, tex.width, tex.height),
+                pr.Rectangle(0, 0, sw, sh),
+                pr.Vector2(0, 0), 0.0, pr.WHITE,
+            )
             adjacent = get_adjacent(EDGES, state.current_node) if state.current_node else []
             clicked = draw_graph(
                 NODES, EDGES,
@@ -75,7 +98,7 @@ def main() -> None:
                 adjacent,
                 sw, sh,
             )
-            draw_hud(state.current_node, state.end_node, len(state.visited_nodes), sw, sh)
+            draw_hud(state.current_node, state.end_node, len(state.visited_nodes), state.boots, sw, sh)
 
             if state.minigame_result is not None:
                 msg = "Minijuego superado!" if state.minigame_result else "Fallaste el minijuego"
@@ -94,6 +117,8 @@ def main() -> None:
         pr.end_drawing()
 
     pr.unload_texture(cover_texture)
+    for tex in map_textures:
+        pr.unload_texture(tex)
     pr.close_window()
 
 
