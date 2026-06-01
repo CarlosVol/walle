@@ -4,8 +4,8 @@ import pyray as pr
 from state import GameState, GamePhase
 from graph import NODES, EDGES, dijkstra, get_adjacent
 from renderer.graph_renderer import draw_graph
-from renderer.ui_renderer    import draw_menu, draw_win_screen, draw_hud, draw_casa_screen
-from minigames                import get_random_minigame, set_maze_assets
+from renderer.ui_renderer    import draw_menu, draw_win_screen, draw_hud, draw_casa_screen, draw_selector_screen
+from minigames                import get_random_minigame, get_minigame_by_name, set_maze_assets, set_basura_assets
 
 
 def _new_round(state: GameState) -> None:
@@ -70,6 +70,19 @@ def main() -> None:
     walle_sprites = {d: pr.load_texture(f"{_base}walle_{d}.png") for d in ("up", "down", "left", "right")}
     set_maze_assets({"maze_imgs": maze_imgs, "maze_texs": maze_texs, "walle_sprites": walle_sprites})
 
+    _bbase = "images/minigame_basura/"
+    basura_textures = {
+        "escenario":      pr.load_texture(f"{_bbase}escenario.png"),
+        "montana":        [pr.load_texture(f"{_bbase}montaña_{i}.png") for i in (1, 2, 3, 4)],
+        "pila":           [pr.load_texture(f"{_bbase}pila_{i}.png") for i in (1, 2, 3)],
+        "basura":         [pr.load_texture(f"{_bbase}basura_{i}.png") for i in (1, 2, 3, 4, 5)],
+        "toxica":         pr.load_texture(f"{_bbase}basura_toxica.png"),
+        "walle_rest":     pr.load_texture(f"{_bbase}walle_rest.png"),
+        "walle_open":     pr.load_texture(f"{_bbase}walle_open.png"),
+        "walle_cooking":  pr.load_texture(f"{_bbase}walle_cooking.png"),
+    }
+    set_basura_assets(basura_textures)
+
     state = GameState()
 
     while not pr.window_should_close():
@@ -82,13 +95,29 @@ def main() -> None:
             if state.active_minigame.is_complete:
                 state.minigame_result = state.active_minigame.passed
                 state.active_minigame = None
-                state.phase = GamePhase.GRAPH
+                if state.from_selector:
+                    state.from_selector = False
+                    state.phase = GamePhase.SELECTOR
+                else:
+                    state.phase = GamePhase.GRAPH
 
         pr.begin_drawing()
 
         if state.phase == GamePhase.MENU:
-            if draw_menu(cover_texture, sw, sh):
+            action = draw_menu(cover_texture, sw, sh)
+            if action == "iniciar":
                 _start_game(state)
+            elif action == "selector":
+                state.phase = GamePhase.SELECTOR
+
+        elif state.phase == GamePhase.SELECTOR:
+            clicked = draw_selector_screen(sw, sh)
+            if clicked == "back":
+                state.phase = GamePhase.MENU
+            elif clicked:
+                state.active_minigame = get_minigame_by_name(clicked)
+                state.from_selector = True
+                state.phase = GamePhase.MINIGAME
 
         elif state.phase == GamePhase.GRAPH:
             pr.clear_background(pr.Color(30, 30, 30, 255))
@@ -149,6 +178,17 @@ def main() -> None:
         pr.unload_texture(tex)
     for tex in walle_sprites.values():
         pr.unload_texture(tex)
+    pr.unload_texture(basura_textures["escenario"])
+    for tex in basura_textures["montana"]:
+        pr.unload_texture(tex)
+    for tex in basura_textures["pila"]:
+        pr.unload_texture(tex)
+    for tex in basura_textures["basura"]:
+        pr.unload_texture(tex)
+    pr.unload_texture(basura_textures["toxica"])
+    pr.unload_texture(basura_textures["walle_rest"])
+    pr.unload_texture(basura_textures["walle_open"])
+    pr.unload_texture(basura_textures["walle_cooking"])
     pr.close_window()
 
 

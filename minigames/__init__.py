@@ -3,7 +3,8 @@ from .base         import Minigame
 from .stub_collect import CollectDotMinigame
 from .stub_timer   import SurviveTimerMinigame
 
-_maze_assets: dict | None = None
+_maze_assets:   dict | None = None
+_basura_assets: dict | None = None
 
 
 def set_maze_assets(assets: dict) -> None:
@@ -11,12 +12,36 @@ def set_maze_assets(assets: dict) -> None:
     _maze_assets = assets
 
 
+def set_basura_assets(assets: dict) -> None:
+    global _basura_assets
+    _basura_assets = assets
+
+
 def get_random_minigame() -> Minigame:
-    from .maze import MazeMiniGame
+    from .maze   import MazeMiniGame
+    from .basura import BasuraMiniGame
     options: list = [CollectDotMinigame, SurviveTimerMinigame]
     if _maze_assets is not None:
         options.append(lambda: MazeMiniGame(**_maze_assets))
+    if _basura_assets is not None:
+        options.append(lambda: BasuraMiniGame(_basura_assets))
     return random.choice(options)()
 
 
-__all__ = ["Minigame", "get_random_minigame", "set_maze_assets"]
+def get_minigame_by_name(name: str) -> Minigame:
+    from .maze   import MazeMiniGame
+    from .basura import BasuraMiniGame
+    match name:
+        case "maze":
+            return MazeMiniGame(**_maze_assets)
+        case "basura":
+            return BasuraMiniGame(_basura_assets)
+        case "collect":
+            return CollectDotMinigame()
+        case "timer":
+            return SurviveTimerMinigame()
+        case _:
+            raise ValueError(f"Unknown minigame: {name}")
+
+
+__all__ = ["Minigame", "get_random_minigame", "set_maze_assets", "set_basura_assets", "get_minigame_by_name"]

@@ -5,6 +5,7 @@ from typing import Optional
 
 class GamePhase(Enum):
     MENU     = auto()
+    SELECTOR = auto()
     GRAPH    = auto()
     MINIGAME = auto()
     CASA     = auto()
@@ -23,3 +24,4 @@ class GameState:
     minigame_result: Optional[bool] = None
     boots:           int             = 0
     map_index:       int             = 1
+    from_selector:   bool            = False
