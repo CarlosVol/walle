@@ -5,7 +5,7 @@ from state import GameState, GamePhase
 from graph import NODES, EDGES, dijkstra, get_adjacent
 from renderer.graph_renderer import draw_graph
 from renderer.ui_renderer    import draw_menu, draw_win_screen, draw_hud, draw_casa_screen
-from minigames                import get_random_minigame
+from minigames                import get_random_minigame, set_maze_assets
 
 
 def _new_round(state: GameState) -> None:
@@ -63,6 +63,12 @@ def main() -> None:
         pr.load_texture("images/casa1.png"),
         pr.load_texture("images/casa2.png"),
     ]
+
+    _base = "images/minigame_laberinto/"
+    maze_imgs = [pr.load_image(f"{_base}laberinto_{i}.png") for i in (1, 2, 3)]
+    maze_texs = [pr.load_texture(f"{_base}laberinto_{i}.png") for i in (1, 2, 3)]
+    walle_sprites = {d: pr.load_texture(f"{_base}walle_{d}.png") for d in ("up", "down", "left", "right")}
+    set_maze_assets({"maze_imgs": maze_imgs, "maze_texs": maze_texs, "walle_sprites": walle_sprites})
 
     state = GameState()
 
@@ -136,6 +142,12 @@ def main() -> None:
     for tex in map_textures:
         pr.unload_texture(tex)
     for tex in casa_textures:
+        pr.unload_texture(tex)
+    for img in maze_imgs:
+        pr.unload_image(img)
+    for tex in maze_texs:
+        pr.unload_texture(tex)
+    for tex in walle_sprites.values():
         pr.unload_texture(tex)
     pr.close_window()
 
