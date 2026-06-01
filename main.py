@@ -5,7 +5,7 @@ from state import GameState, GamePhase
 from graph import NODES, EDGES, dijkstra, get_adjacent
 from renderer.graph_renderer import draw_graph
 from renderer.ui_renderer    import draw_menu, draw_win_screen, draw_hud, draw_casa_screen, draw_selector_screen
-from minigames                import get_random_minigame, get_minigame_by_name, set_maze_assets, set_basura_assets
+from minigames                import get_random_minigame, get_minigame_by_name, set_maze_assets, set_basura_assets, set_memoria_assets
 
 
 def _new_round(state: GameState) -> None:
@@ -82,6 +82,14 @@ def main() -> None:
         "walle_cooking":  pr.load_texture(f"{_bbase}walle_cooking.png"),
     }
     set_basura_assets(basura_textures)
+
+    _mbase = "images/minigame_memoria/"
+    memoria_textures = {
+        "escenario":    pr.load_texture(f"{_mbase}escenario.png"),
+        "carta_detras": pr.load_texture(f"{_mbase}carta_detras.png"),
+        "cartas":       [pr.load_texture(f"{_mbase}carta_{i}.png") for i in range(1, 9)],
+    }
+    set_memoria_assets(memoria_textures)
 
     state = GameState()
 
@@ -189,6 +197,10 @@ def main() -> None:
     pr.unload_texture(basura_textures["walle_rest"])
     pr.unload_texture(basura_textures["walle_open"])
     pr.unload_texture(basura_textures["walle_cooking"])
+    pr.unload_texture(memoria_textures["escenario"])
+    pr.unload_texture(memoria_textures["carta_detras"])
+    for tex in memoria_textures["cartas"]:
+        pr.unload_texture(tex)
     pr.close_window()
 
 
