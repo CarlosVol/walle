@@ -1,21 +1,23 @@
+import math
 import random
 import pyray as pr
 
-_TOXIC_CHANCE = 0.25
-_MAX_BASURAS  = 6
+_TOXIC_CHANCE        = 0.25
+_MAX_BASURAS         = 16
+_AUTO_SPAWN_INTERVAL = 0.7   # la montaña suelta basura sola
 
+# muchos puntos repartidos alrededor de la montaña
 _SPAWN_OFFSETS = [
-    (-160, -70),
-    (-270,  10),
-    ( -80, -150),
-    (-310, -90),
-    ( 130, -100),
-    ( 110, -190),
+    (-160,  -70), (-270,   10), ( -80, -150), (-310,  -90),
+    ( 130, -100), ( 110, -190), (-200, -200), (  40, -240),
+    (-120,  -30), (-240, -140), (  90,  -40), ( -40, -300),
+    (-330,    0), ( 160, -200), (-180, -260), (   0, -120),
+    (-300,  -50), (  60, -160), (-100, -220), ( 180,  -80),
 ]
 
 
 class BasuraMiniGame:
-    TIMEOUT = 60.0
+    TIMEOUT = 20.0
     WALLE_W, WALLE_H      = 210, 250
     WALLE_OPEN_W          = 270   # open sprite is narrower art, force wider render
     BASURA_W, BASURA_H    = 70,  70
@@ -23,7 +25,11 @@ class BasuraMiniGame:
     PILA_W,  PILA_H  = 200, 230
     COOK_TIME         = 1.0
     TOXIC_PENALTY     = 10.0
-    GRAVITY           = 0.9   # normalized units/sec²
+    GRAVITY           = 0.30  # normalized units/sec²
+    MAX_VY            = 0.45   # velocidad de caida tope (evita caida exponencial)
+    SHAKE_AMP_DEG     = 5.0   # amplitud balanceo montaña (grados)
+    SHAKE_SPEED       = 6.0   # velocidad balanceo
+    PILA_EVERY        = 3     # basuras buenas por pila
 
     # swapped: walle right, pila left
     WALLE_NX, WALLE_NY = 340 / 1392, 629 / 768
@@ -43,6 +49,7 @@ class BasuraMiniGame:
         self._drag_idx: int | None = None
         self._drag_ox:  int = 0
         self._drag_oy:  int = 0
+        self._auto_timer = 0.0
 
     # ------------------------------------------------------------------ helpers
 
@@ -50,7 +57,8 @@ class BasuraMiniGame:
         return min(self._good_count // 3, 3)
 
     def _pila_idx(self) -> int:
-        return min((self._good_count - 1) // 3, 2)
+        # una imagen de pila por cada 3 basuras: 3→0, 6→1, 9→2
+        return min(self._good_count // self.PILA_EVERY - 1, 2)
 
     def _rect_px(self, nx, ny, w, h, sw, sh) -> pr.Rectangle:
         return pr.Rectangle(int(nx * sw) - w // 2, int(ny * sh) - h // 2, w, h)
@@ -70,10 +78,9 @@ class BasuraMiniGame:
         )
 
     def _spawn_basura(self) -> None:
-        slot = len(self._basuras)
-        dx, dy = _SPAWN_OFFSETS[slot]
+        dx, dy = random.choice(_SPAWN_OFFSETS)
         nx = (1087 + dx) / 1392
-        ny = (608  + dy) / 768
+        ny = (430  + dy) / 768
         is_toxic = random.random() < _TOXIC_CHANCE
         btype = "toxica" if is_toxic else random.randint(1, 5)
         self._basuras.append({"type": btype, "nx": nx, "ny": ny,
@@ -111,6 +118,13 @@ class BasuraMiniGame:
             self._cook_timer -= dt
             if self._cook_timer <= 0:
                 self._walle_state = "rest"
+
+        # la montaña suelta basura sola
+        self._auto_timer += dt
+        if self._auto_timer >= _AUTO_SPAWN_INTERVAL:
+            self._auto_timer = 0.0
+            if len(self._basuras) < _MAX_BASURAS:
+                self._spawn_basura()
 
         # click mountain → spawn up to 6
         if pressed and self._drag_idx is None:
@@ -156,7 +170,7 @@ class BasuraMiniGame:
             if i == self._drag_idx:
                 continue
             p = self._basuras[i]
-            p["vy"] += self.GRAVITY * dt
+            p["vy"] = min(p["vy"] + self.GRAVITY * dt, self.MAX_VY)
             p["ny"] += p["vy"] * dt
             if p["ny"] > 1.15:
                 self._basuras.pop(i)
@@ -181,14 +195,23 @@ class BasuraMiniGame:
             pr.Vector2(0, 0), 0.0, pr.WHITE,
         )
 
-        # mountain
+        # mountain (con balanceo propio: rota desde la base)
         mi = self._mountain_idx()
         mtn_tex = self._tex["montana"][mi]
         mw, mh = self.MTN_SIZES[mi]
-        blit(mtn_tex, self.MTN_NX, self.MTN_NY, mw, mh)
+        angle = math.sin(self._elapsed * self.SHAKE_SPEED) * self.SHAKE_AMP_DEG
+        mcx = int(self.MTN_NX * sw)
+        mbase_y = int(self.MTN_NY * sh) + mh // 2   # pivote en la base
+        pr.draw_texture_pro(
+            mtn_tex,
+            pr.Rectangle(0, 0, mtn_tex.width, mtn_tex.height),
+            pr.Rectangle(mcx, mbase_y, mw, mh),
+            pr.Vector2(mw / 2, mh),   # origen: centro-inferior
+            angle, pr.WHITE,
+        )
 
-        # pila (appears after every 3 good)
-        if self._good_count >= 3:
+        # pila (cambia de imagen cada PILA_EVERY basuras)
+        if self._good_count >= self.PILA_EVERY:
             pila_tex = self._tex["pila"][self._pila_idx()]
             blit(pila_tex, self.PILA_NX, self.PILA_NY, self.PILA_W, self.PILA_H)
 
@@ -206,13 +229,30 @@ class BasuraMiniGame:
         # timeout bar
         remaining = max(0.0, self.TIMEOUT - self._elapsed)
         bar_w = int((sw - 100) * remaining / self.TIMEOUT)
-        color = pr.GREEN if remaining > 20 else (pr.ORANGE if remaining > 10 else pr.RED)
+        color = pr.GREEN if remaining > 10 else (pr.ORANGE if remaining > 5 else pr.RED)
         pr.draw_rectangle(50, sh - 30, sw - 100, 20, pr.DARKGRAY)
         pr.draw_rectangle(50, sh - 30, bar_w, 20, color)
 
+        # indicador: cuanta basura falta para la proxima pila
+        in_cycle  = self._good_count % self.PILA_EVERY
+        faltan    = self.PILA_EVERY - in_cycle
+        ind_cx    = int(self.PILA_NX * sw)
+        ind_y     = int(0.42 * sh)
+        lbl       = f"Pila en {faltan}"
+        pr.draw_text(lbl, ind_cx - pr.measure_text(lbl, 20) // 2, ind_y - 30, 20, pr.RAYWHITE)
+        dot_r  = 12
+        dot_gap = 34
+        x0 = ind_cx - (self.PILA_EVERY - 1) * dot_gap // 2
+        for d in range(self.PILA_EVERY):
+            cx = x0 + d * dot_gap
+            if d < in_cycle:
+                pr.draw_circle(cx, ind_y, dot_r, pr.GREEN)
+            else:
+                pr.draw_circle_lines(cx, ind_y, dot_r, pr.RAYWHITE)
+
         # hud
-        slots_left = _MAX_BASURAS - len(self._basuras)
-        msg = f"Arrastra la basura a Walle!   {self._good_count}/9"
+        pilas = self._good_count // self.PILA_EVERY
+        msg = f"Arrastra la basura a Walle!   Pilas {pilas}/3"
         pr.draw_text(msg, (sw - pr.measure_text(msg, 22)) // 2, 16, 22, pr.RAYWHITE)
 
         if self._drag_idx is not None:

@@ -48,13 +48,12 @@ def draw_selector_screen(sw: int, sh: int) -> str | None:
     pr.draw_text(title, (sw - tw) // 2, int(sh * 0.08), 48, pr.GOLD)
 
     games = [
-        ("maze",    "Laberinto"),
-        ("basura",  "Recoge la Basura"),
-        ("collect", "Recoge el Punto"),
-        ("timer",   "Sobrevive"),
+        ("maze",       "Laberinto"),
+        ("basura",     "Recoge la Basura"),
         ("memoria",    "Memoria"),
         ("recolector", "Recolector"),
-        ("cucaracha",  "Las 3 Latas"),
+        ("cucaracha",    "Las 3 Latas"),
+        ("rompecabezas", "Rompecabezas"),
     ]
 
     btn_w, btn_h, gap = 340, 65, 20

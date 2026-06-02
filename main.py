@@ -1,3 +1,4 @@
+import json
 import random
 import pyray as pr
 
@@ -5,12 +6,30 @@ from state import GameState, GamePhase
 from graph import NODES, EDGES, dijkstra, get_adjacent
 from renderer.graph_renderer import draw_graph
 from renderer.ui_renderer    import draw_menu, draw_win_screen, draw_hud, draw_casa_screen, draw_selector_screen
-from minigames                import get_random_minigame, get_minigame_by_name, set_maze_assets, set_basura_assets, set_memoria_assets, set_recolector_assets, set_cucaracha_assets
+from minigames                import get_random_minigame, get_minigame_by_name, set_maze_assets, set_basura_assets, set_memoria_assets, set_recolector_assets, set_cucaracha_assets, set_rompecabezas_assets
+
+
+def _pick_far_pair() -> tuple[str, str]:
+    """Elige par inicio/fin entre los mas lejanos (mas saltos en el grafo)."""
+    ids = list(NODES.keys())
+    best: list[tuple[str, str]] = []
+    best_len = 0
+    for i in range(len(ids)):
+        for j in range(i + 1, len(ids)):
+            path = dijkstra(NODES, EDGES, ids[i], ids[j])
+            if not path:
+                continue
+            n = len(path)
+            if n > best_len:
+                best_len, best = n, [(ids[i], ids[j])]
+            elif n == best_len:
+                best.append((ids[i], ids[j]))
+    a, b = random.choice(best)
+    return (a, b) if random.random() < 0.5 else (b, a)
 
 
 def _new_round(state: GameState) -> None:
-    node_ids = list(NODES.keys())
-    state.start_node, state.end_node = random.sample(node_ids, 2)
+    state.start_node, state.end_node = _pick_far_pair()
     state.current_node  = state.start_node
     state.visited_nodes = {state.start_node}
     state.optimal_path  = dijkstra(NODES, EDGES, state.start_node, state.end_node)
@@ -110,6 +129,22 @@ def main() -> None:
         "x":          pr.load_texture(f"{_cbase}X.png"),
     }
     set_cucaracha_assets(cucaracha_textures)
+
+    _pbase = "images/minigame_rompecabezas/"
+    with open(f"{_pbase}piezas/manifest.json") as f:
+        _pman = json.load(f)
+    rompe_piezas = [
+        [[pr.load_texture(f"{_pbase}piezas/rompe{v}_{r}_{c}.png")
+          for c in range(3)] for r in range(3)]
+        for v in (1, 2, 3)
+    ]
+    rompecabezas_textures = {
+        "escenario": pr.load_texture(f"{_pbase}escenario.png"),
+        "variantes": [pr.load_texture(f"{_pbase}rompe_{i}.png") for i in (1, 2, 3)],
+        "piezas":    rompe_piezas,
+        "manifest":  [_pman[str(v)] for v in (1, 2, 3)],
+    }
+    set_rompecabezas_assets(rompecabezas_textures)
 
     state = GameState()
 
@@ -234,6 +269,13 @@ def main() -> None:
         pr.unload_texture(tex)
     pr.unload_texture(cucaracha_textures["destello"])
     pr.unload_texture(cucaracha_textures["x"])
+    pr.unload_texture(rompecabezas_textures["escenario"])
+    for tex in rompecabezas_textures["variantes"]:
+        pr.unload_texture(tex)
+    for variant in rompecabezas_textures["piezas"]:
+        for row in variant:
+            for tex in row:
+                pr.unload_texture(tex)
     pr.close_window()
 
 
