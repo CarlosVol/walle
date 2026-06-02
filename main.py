@@ -5,7 +5,7 @@ from state import GameState, GamePhase
 from graph import NODES, EDGES, dijkstra, get_adjacent
 from renderer.graph_renderer import draw_graph
 from renderer.ui_renderer    import draw_menu, draw_win_screen, draw_hud, draw_casa_screen, draw_selector_screen
-from minigames                import get_random_minigame, get_minigame_by_name, set_maze_assets, set_basura_assets, set_memoria_assets, set_recolector_assets
+from minigames                import get_random_minigame, get_minigame_by_name, set_maze_assets, set_basura_assets, set_memoria_assets, set_recolector_assets, set_cucaracha_assets
 
 
 def _new_round(state: GameState) -> None:
@@ -99,6 +99,17 @@ def main() -> None:
         "valioso":   [pr.load_texture(f"{_rbase}valioso_{i}.png") for i in range(1, 4)],
     }
     set_recolector_assets(recolector_textures)
+
+    _cbase = "images/minigame_cucaracha/"
+    cucaracha_textures = {
+        "escenario":  pr.load_texture(f"{_cbase}escenario.png"),
+        "lata":       pr.load_texture(f"{_cbase}lata.png"),
+        "lata_mov":   pr.load_texture(f"{_cbase}lata_moviendose.png"),
+        "cucarachas": [pr.load_texture(f"{_cbase}cucaracha_{i}.png") for i in (1, 2, 3)],
+        "destello":   pr.load_texture(f"{_cbase}destello.png"),
+        "x":          pr.load_texture(f"{_cbase}X.png"),
+    }
+    set_cucaracha_assets(cucaracha_textures)
 
     state = GameState()
 
@@ -216,6 +227,13 @@ def main() -> None:
         pr.unload_texture(tex)
     for tex in recolector_textures["valioso"]:
         pr.unload_texture(tex)
+    pr.unload_texture(cucaracha_textures["escenario"])
+    pr.unload_texture(cucaracha_textures["lata"])
+    pr.unload_texture(cucaracha_textures["lata_mov"])
+    for tex in cucaracha_textures["cucarachas"]:
+        pr.unload_texture(tex)
+    pr.unload_texture(cucaracha_textures["destello"])
+    pr.unload_texture(cucaracha_textures["x"])
     pr.close_window()
 
 

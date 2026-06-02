@@ -54,6 +54,7 @@ def draw_selector_screen(sw: int, sh: int) -> str | None:
         ("timer",   "Sobrevive"),
         ("memoria",    "Memoria"),
         ("recolector", "Recolector"),
+        ("cucaracha",  "Las 3 Latas"),
     ]
 
     btn_w, btn_h, gap = 340, 65, 20
